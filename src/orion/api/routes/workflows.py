@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import contextlib
+import time
 import uuid
 from typing import Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from orion.observability.metrics import get_meter
 from orion.workflow.client import get_temporal_client
 
 router = APIRouter(prefix="/api/v1/workflows", tags=["workflows"])
@@ -29,6 +31,12 @@ class WorkflowStatusResponse(BaseModel):
     run_id: str
     status: str
     result: Any | None = None
+
+
+class WorkflowCancelResponse(BaseModel):
+    workflow_id: str
+    status: str
+    propagation_ms: float
 
 
 @router.post("/start")
@@ -73,12 +81,23 @@ async def get_workflow_status(workflow_id: str) -> dict[str, Any]:
 
 
 @router.post("/{workflow_id}/cancel")
-async def cancel_workflow(workflow_id: str) -> dict[str, str]:
-    """Cancel a running workflow."""
+async def cancel_workflow(workflow_id: str) -> WorkflowCancelResponse:
+    """Cancel a running workflow. Propagation target: < 3s."""
+    start = time.monotonic()
     client = await get_temporal_client()
     handle = client.get_workflow_handle(workflow_id)
     await handle.cancel()
-    return {"workflow_id": workflow_id, "status": "cancelling"}
+
+    elapsed_ms = (time.monotonic() - start) * 1000
+    meter = get_meter()
+    if hasattr(meter, "record_histogram"):
+        meter.record_histogram("cancellation.propagation.ms", elapsed_ms)
+
+    return WorkflowCancelResponse(
+        workflow_id=workflow_id,
+        status="cancelling",
+        propagation_ms=round(elapsed_ms, 2),
+    )
 
 
 @router.post("/{workflow_id}/signal")

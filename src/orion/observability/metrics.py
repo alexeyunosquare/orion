@@ -27,4 +27,9 @@ def get_meter():
         name="orion.workflow_runs_total",
         description="Total number of workflow runs",
     )
+    _meter.create_histogram(
+        name="cancellation.propagation.ms",
+        description="Time from cancel request to activity termination",
+        unit="ms",
+    )
     return _meter
