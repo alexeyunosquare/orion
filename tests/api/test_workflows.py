@@ -1,7 +1,5 @@
 """Tests for workflow API endpoints."""
 
-import pytest
-
 from orion.api.routes.workflows import (
     WorkflowStartRequest,
     WorkflowStartResponse,

@@ -1,22 +1,33 @@
 from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from orion.api.routes import health, streaming, tools, workflows
 from orion.config import settings
+from orion.db.session import init_db
+from orion.observability.logging import setup_logging
+from orion.observability.tracing import instrument_app, setup_tracing
 from orion.tools.registry import mcp_server
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     # Startup
+    setup_logging("DEBUG" if settings.debug else "INFO")
+    setup_tracing()
+    instrument_app(app)
+
     # Import tools to register them
     from orion.tools import registry  # noqa: F401, PLC0415
 
+    # Database may not be available in tests
+    with suppress(Exception):
+        await init_db()
+
     yield
-    # Shutdown
+    # Shutdown — cleanup connections
 
 
 # Create MCP ASGI app

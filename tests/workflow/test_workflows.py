@@ -31,9 +31,9 @@ def test_workflow_has_query_handler():
 def test_workflow_initial_state():
     """Workflow starts with correct initial state."""
     wf = ResearchWorkflow()
-    assert wf._status == "pending"
-    assert wf._current_step == 0
-    assert wf._cancelled is False
+    assert wf._status == "pending"  # noqa: SLF001
+    assert wf._current_step == 0  # noqa: SLF001
+    assert wf._cancelled is False  # noqa: SLF001
 
 
 def test_activities_are_defined():
