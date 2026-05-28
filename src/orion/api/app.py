@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from orion.api.routes import health, streaming, tools
+from orion.api.routes import health, streaming, tools, workflows
 from orion.config import settings
 from orion.tools.registry import mcp_server
 
@@ -38,6 +38,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(tools.router)
 app.include_router(streaming.router)
+app.include_router(workflows.router)
 
 # Mount MCP HTTP app for native MCP clients
 app.mount("/mcp", mcp_app)
