@@ -61,3 +61,20 @@ class ExecutionOutput(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     request: ExecutionRequest | None = Relationship(back_populates="outputs")
+
+
+class ApprovalRecord(SQLModel, table=True):
+    """Audit record of approval decisions."""
+
+    __tablename__ = "approval_records"
+
+    id: int | None = Field(default=None, primary_key=True)
+    request_id: str = Field(index=True)
+    workflow_id: str = Field(index=True)
+    title: str
+    requested_by: str
+    decision: str  # "approved" | "rejected" | "timed_out"
+    decided_by: str = ""
+    reason: str = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    decided_at: datetime | None = None

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orion-worker
+  labels:
+    app: orion
+    component: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orion
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: orion
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: orion-worker:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: orion-secrets
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"

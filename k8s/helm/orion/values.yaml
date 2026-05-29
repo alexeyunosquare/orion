@@ -1,0 +1,43 @@
+# Default values for Orion Agent Platform
+
+global:
+  imagePullPolicy: IfNotPresent
+  secretsRef: orion-secrets
+
+api:
+  replicas: 3
+  image:
+    repository: orion-api
+    tag: latest
+  port: 8000
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+  livenessProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 30
+    failureThreshold: 3
+
+worker:
+  replicas: 2
+  image:
+    repository: orion-worker
+    tag: latest
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"

@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     # Security
     api_key: str | None = None
     jwt_secret: str | None = None
+    allowed_origins: list[str] = ["*"]
+    rate_limit_requests: int = 100
+    rate_limit_window_seconds: int = 60
+    # Paths exempt from API key auth (health, MCP, docs, openapi)
+    auth_exempt_paths: list[str] = ["/health", "/mcp", "/docs", "/openapi.json", "/redoc"]
 
     # Observability
     otel_endpoint: str | None = None

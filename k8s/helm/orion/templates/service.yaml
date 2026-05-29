@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: orion
+    component: api
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: orion
+    component: api
+    release: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.api.service.port }}
+      targetPort: {{ .Values.api.port }}
+      protocol: TCP
+      name: http
+  type: {{ .Values.api.service.type }}

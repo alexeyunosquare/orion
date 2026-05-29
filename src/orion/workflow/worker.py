@@ -11,7 +11,7 @@ from orion.workflow.activities import (
     summarize_activity,
 )
 from orion.workflow.client import get_temporal_client
-from orion.workflow.workflows import ResearchWorkflow
+from orion.workflow.workflows import ApprovedResearchWorkflow, ResearchWorkflow
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ async def start_worker(client: Client) -> None:
         client=client,
         task_queue=settings.temporal_task_queue,
         activities=[search_activity, summarize_activity, report_activity],
-        workflows=[ResearchWorkflow],
+        workflows=[ResearchWorkflow, ApprovedResearchWorkflow],
     )
     logger.info("Worker started on task queue: %s", settings.temporal_task_queue)
     await worker.run()

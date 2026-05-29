@@ -447,10 +447,10 @@ Stores:
 
 # 13. Open Questions
 
-* Should streaming support replay/resume?
-* Should workflows support DAG editing?
-* Should agent memory be persisted separately?
-* Should workflows support human approval steps?
+* **Streaming replay/resume** — Deferred. Not a core requirement; would require persisting every stream event (contradicts §4.4).
+* **DAG editing** — Out of scope. Listed as Future Enhancement (§14). Requires frontend + serialization format.
+* **Agent memory persistence** — **Resolved.** Implemented in Phase 9 (`docs/arch/phase9-spec.md` Part B). PostgreSQL-backed with optional pgvector embeddings.
+* **Human approval steps** — **Resolved.** Implemented in Phase 9 (`docs/arch/phase9-spec.md` Part A). Temporal `workflow.condition()` + signal-based approval gates.
 
 ---
 

@@ -1,14 +1,20 @@
+"""FastAPI application factory with middleware and routing."""
+
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager, suppress
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from orion.api.routes import health, streaming, tools, workflows
+from orion.api import websocket as ws_module
+from orion.api.routes import approvals, health, memory, streaming, tools, workflows
 from orion.config import settings
 from orion.db.session import init_db
 from orion.observability.logging import setup_logging
 from orion.observability.tracing import instrument_app, setup_tracing
+from orion.security.audit import AuditMiddleware
+from orion.security.auth import verify_api_key
+from orion.security.rate_limit import RateLimitMiddleware
 from orion.tools.registry import mcp_server
 
 
@@ -38,18 +44,37 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# --- Security middleware (order matters: outer -> inner) ---
+
+# 1. Rate limiting (first line of defence)
+app.add_middleware(RateLimitMiddleware)
+
+# 2. Audit logging (captures all requests)
+app.add_middleware(AuditMiddleware)
+
+# 3. CORS (hardened — configurable origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict in Phase 6
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
 )
 
-# Register routers
+# --- Routers ---
+
+# Health endpoint (no auth required)
 app.include_router(health.router)
-app.include_router(tools.router)
-app.include_router(streaming.router)
-app.include_router(workflows.router)
+
+# Protected API routes
+app.include_router(tools.router, dependencies=[Depends(verify_api_key)])
+app.include_router(streaming.router, dependencies=[Depends(verify_api_key)])
+app.include_router(workflows.router, dependencies=[Depends(verify_api_key)])
+app.include_router(approvals.router, dependencies=[Depends(verify_api_key)])
+app.include_router(memory.router, dependencies=[Depends(verify_api_key)])
+
+# WebSocket streaming (no auth — relies on workflow ID scoping)
+app.include_router(ws_module.router)
 
 # Mount MCP HTTP app for native MCP clients
 app.mount("/mcp", mcp_app)

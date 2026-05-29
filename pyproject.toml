@@ -19,6 +19,9 @@ dependencies = [
     "opentelemetry-instrumentation-fastapi>=0.48b",
     "opentelemetry-instrumentation-httpx>=0.48b",
     "tenacity>=9.0",
+    "cryptography>=42.0",
+    "aiosqlite>=0.22.1",
+    "greenlet>=3.5.1",
 ]
 
 [dependency-groups]
@@ -47,11 +50,32 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "PLR2004"]
+"tests/**" = [
+    "S101",        # Assert in tests
+    "PLR2004",     # Magic value comparison
+    "ANN001",      # Missing type annotation for fixture args
+    "ANN202",      # Missing return type for private fixtures
+    "ARG002",      # Unused method argument (fixture params)
+    "PLC0415",     # Import not at top level (common in tests)
+    "SLF001",      # Private member access (testing internals)
+]
 
 [tool.pytest.ini_options]
 addopts = ["--cov=orion", "--cov-fail-under=80", "-ra"]
 asyncio_mode = "auto"
+
+[tool.coverage.run]
+omit = [
+    "src/orion/alembic/*",       # Alembic migration scripts
+    "src/orion/main.py",          # CLI entry point
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+    "coverage: exclude",
+]
 
 [tool.ty.environment]
 python-version = "3.12"

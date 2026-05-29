@@ -35,8 +35,21 @@ def setup_tracing() -> trace.Tracer:
 
 
 def instrument_app(app) -> None:  # noqa: ANN001
-    """Instrument a FastAPI app with OpenTelemetry.
+    """Instrument a FastAPI app with OpenTelemetry automatic tracing.
 
-    This is a placeholder for actual instrumentation.
+    Attaches the FastAPIInstrumentor to the app so every incoming HTTP
+    request is automatically traced with span data (method, path, status
+    code, duration).  Skips instrumentation if the tracer provider was
+    not yet set up — call :func:`setup_tracing` first.
     """
-    _ = app
+    if _tracer_provider is None:
+        return
+
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor  # noqa: PLC0415
+
+    FastAPIInstrumentor.instrument_app(
+        app,
+        tracer_provider=_tracer_provider,
+        excluded_urls=",".join(settings.auth_exempt_paths),
+        exclude_spans=["receive", "send"],
+    )

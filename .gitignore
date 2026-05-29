@@ -33,3 +33,12 @@ htmlcov/
 # Build
 dist/
 build/
+
+# Docker
+docker-compose.override.yml
+
+# Helm
+.k8s/
+
+# IDE
+*.code-workspace

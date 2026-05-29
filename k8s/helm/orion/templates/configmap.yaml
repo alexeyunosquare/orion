@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  labels:
+    app: orion
+    release: {{ .Release.Name }}
+data:
+  ORION_APP_NAME: "Orion Agent Platform"
+  ORION_DEBUG: "false"
+  ORION_HOST: "0.0.0.0"
+  ORION_PORT: "{{ .Values.api.port }}"
+  ORION_OTEL_SERVICE_NAME: "orion-platform"
+  ORION_DEFAULT_MAX_RETRIES: "3"
+  ORION_DEFAULT_RETRY_BACKOFF: "1.0"
+  ORION_DEFAULT_RETRY_MAX_WAIT: "30"

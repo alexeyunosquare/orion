@@ -2390,7 +2390,7 @@ X-API-Key: <api-key>
 
 ## Appendix E — Open Questions from PRD §13
 
-1. **Streaming replay/resume** — Not implemented. Would require storing stream events in PostgreSQL and supporting `Range` headers or `?from=timestamp` query params.
-2. **DAG editing** — Not implemented. Workflows are code-defined classes. A visual DAG editor would require a separate frontend and workflow serialization format.
-3. **Agent memory persistence** — Not implemented. Could be added as a separate PostgreSQL table with embeddings for semantic search.
-4. **Human approval steps** — Not implemented. Temporal supports `workflow.condition()` which can block until a signal is received — this enables human-in-the-loop approval gates.
+1. **Streaming replay/resume** — Deferred. Not a core requirement.
+2. **DAG editing** — Out of scope. Future enhancement (§14).
+3. **Agent memory persistence** — **Implemented in Phase 9** (`docs/arch/phase9-spec.md` Part B).
+4. **Human approval steps** — **Implemented in Phase 9** (`docs/arch/phase9-spec.md` Part A).
